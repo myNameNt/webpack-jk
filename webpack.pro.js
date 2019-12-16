@@ -4,6 +4,7 @@ const miniCssExtractPlugin = require('mini-css-extract-plugin') // css打包 chu
 const optimizeCssAssetsWebpackPlugin  = require('optimize-css-assets-webpack-plugin') // css 压缩
 const htmlWebpackPlugin = require('html-webpack-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+
 module.exports =  {
   entry: {
     index: './src/index.js',
@@ -34,7 +35,17 @@ module.exports =  {
           miniCssExtractPlugin.loader, // 和style.loader功能相冲突  这个插件是把css打包成一个文件， 而style.loader 是使用style标签直接加到html的head里面
           // 'style-loader', // 将样式通过style标签插入到head里面 -- 后
           'css-loader', // 加载.css 文件并且转化成commonjs对象 -- 先
-          'less-loader' // 将less转化为css
+          'less-loader', // 将less转化为css
+          {
+            loader: 'postcss-loader',
+            options: {
+              plugins: ()=>[
+                require('autoprefixer')({
+                  browsers: ['last 2 version', '>1%', 'ios 7']
+                })
+              ]
+            }
+          }
         ]
       },
       {
