@@ -1,17 +1,23 @@
 import str,{showMyName} from './a'
 import React from 'react'
 import ReactDom from 'react-dom'
+import Hello from './components/Hello.js'
 
-const HelloWorld = ()=>{
-  return (
-    <div>hello react</div>
-  )
-}
-
+// class App extends React.Component {
+//   constructor(){
+//     super()
+//   }
+//   render () {
+//     return (
+//       <div>
+//         <Hello><i>我是传过来的children</i></Hello>
+//       </div>
+//     )
+//   }
+// }
 ReactDom.render(
-  <HelloWorld/>,
+  <Hello/>,
   document.querySelector('#app')
 )
-
 showMyName('开始学习webpack')
 console.log(str)
