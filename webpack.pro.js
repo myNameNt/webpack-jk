@@ -5,7 +5,7 @@ const miniCssExtractPlugin = require('mini-css-extract-plugin') // css打包 chu
 const optimizeCssAssetsWebpackPlugin  = require('optimize-css-assets-webpack-plugin') // css 压缩
 const htmlWebpackPlugin = require('html-webpack-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
-
+const HtmlWebpackExternalsPlugin = require('html-webpack-externals-plugin') // 将第三方包
 const projectRoot = process.cwd();
 const setMPA = () => {
   const entry = {};
@@ -22,7 +22,7 @@ const setMPA = () => {
           inlineSource: '.css$',
           template: path.join(projectRoot, `./src/${pageName}/index.html`),
           filename: `${pageName}.html`,
-          chunks: ['vendors', pageName],
+          chunks: ['vendors', 'commons', pageName],
           inject: true,
           minify: {
             html5: true,
@@ -57,7 +57,10 @@ module.exports =  {
     rules: [
       {
         test: /.js$/,
-        use: 'babel-loader'
+        use: [
+          'babel-loader',
+          'eslint-loader'
+        ]
       },
       {
         test: /.css$/,
@@ -125,8 +128,49 @@ module.exports =  {
       assetNameRegExp: /\.css$/g,
       cssProcessor: require('cssnano')  //  需要依赖的插件
     }),
-    new CleanWebpackPlugin()
-  ].concat(htmlWebpackPlugins),
+    new CleanWebpackPlugin(),
+    
+  ].concat(htmlWebpackPlugins, [
+    // 使用该插件需要放在 htmlWebpackPlugins 后面
+    // new HtmlWebpackExternalsPlugin({ // 将第三方包单独提取出来，使用cnd的方式加载
+    //   externals: [
+    //     {
+    //       module: 'react',
+    //       entry: 'https://cdn.bootcss.com/react/16.10.2/cjs/react.development.js',
+    //       global: 'React',
+    //     },
+    //   ],
+    // })
+  ]),
+  optimization: { // 自带的分包工具 将不轻易变更的第三方包 提取出来合成一个vandors文件 有利于后续利用浏览器缓存 提升页面加载速度
+    // splitChunks: {
+    //   minSize: 0, // 引用的文件大于多少就将该文件提取出来  设置为0 时 只要别引用就提取出来
+    //   cacheGroups: {
+    //     commons: {
+    //       test: /(react|react-dom)/,
+    //       name: "vendors",
+    //       chunks: "all"
+    //     }
+    //   },
+    // }
+    // splitChunks: { // 代码拆分和 懒加载模块有冲突， 但不知道为什么？
+    //   minSize: 0,
+    //   cacheGroups: {
+    //     commons: { // 项目重复用到的模块 打包到一起
+    //       name: 'commons',
+    //       chunks: 'all',
+    //       minChunks: 1,
+    //       priority: 0 
+    //     },
+    //     vendors: {  // 项目用到的第三方包 打包到一起
+    //       test: /[\\/]node_modules[\\/]/,
+    //       name: "vendors",
+    //       chunks: "all",
+    //       priority: 10
+    //     },
+    //   }
+    // }
+  },
   devtool: 'inline-source-map'
   // plugins: [
   //   new webpack.HotModuleReplacementPlugin()
