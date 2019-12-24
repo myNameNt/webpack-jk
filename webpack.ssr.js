@@ -10,30 +10,33 @@ const projectRoot = process.cwd();
 const setMPA = () => {
   const entry = {};
   const htmlWebpackPlugins = [];
-  const entryFiles = glob.sync(path.join(projectRoot, './src/*/index.js'));
+  const entryFiles = glob.sync(path.join(projectRoot, './src/*/index-server.js'));
   Object.keys(entryFiles)
     .map((index) => {
       const entryFile = entryFiles[index];
-      const match = entryFile.match(/src\/(.*)\/index\.js/);
+      const match = entryFile.match(/src\/(.*)\/index-server\.js/);
       const pageName = match && match[1];
-      entry[pageName] = entryFile;
-      htmlWebpackPlugins.push(
-        new htmlWebpackPlugin({
-          inlineSource: '.css$',
-          template: path.join(projectRoot, `./src/${pageName}/index.html`),
-          filename: `${pageName}.html`,
-          chunks: ['vendors', 'commons', pageName],
-          inject: true,
-          minify: {
-            html5: true,
-            collapseWhitespace: true,
-            preserveLineBreaks: false,
-            minifyCSS: true,
-            minifyJS: true,
-            removeComments: false,
-          },
-        })
-      );
+
+      if (pageName) {
+        entry[pageName] = entryFile;
+        htmlWebpackPlugins.push(
+          new htmlWebpackPlugin({
+            inlineSource: '.css$',
+            template: path.join(projectRoot, `./src/${pageName}/index.html`),
+            filename: `${pageName}.html`,
+            chunks: ['vendors', 'commons', pageName],
+            inject: true,
+            minify: {
+              html5: true,
+              collapseWhitespace: true,
+              preserveLineBreaks: false,
+              minifyCSS: true,
+              minifyJS: true,
+              removeComments: false,
+            },
+          })
+        );
+      }
     });
 
   return {
@@ -43,14 +46,13 @@ const setMPA = () => {
 };
 
 const { entry, htmlWebpackPlugins } = setMPA();
+console.log(entry,'entry--')
 module.exports =  {
-  entry: {
-    index: './src/index/index.js',
-    super: './src/search/index.js'
-  },
+  entry: entry,
   output: {
     path: path.join(__dirname, 'dist'),
-    filename: '[name]_[chunkhash:8].js'
+    filename: '[name]-server.js',
+    libraryTarget: 'umd'
   },
   mode: 'production', // 当mode的值为 none时就会关闭 tree shaking 功能 webpack 生产环境默认是开启了tree shaking的 tree shaking 的作用是去掉 代码中没有用到的代码。 （名字的由来就是，我们用力去摇一颗树的时候，树上的老的叶子会掉下来）
   module: {

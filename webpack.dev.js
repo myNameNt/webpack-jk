@@ -4,6 +4,7 @@ const glob = require('glob')
 const webpack = require('webpack')
 const htmlWebpackPlugin = require('html-webpack-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin') // 用于在编译完成之后 清晰的提示本次构建 是成功还是失败
 const projectRoot = process.cwd();
 const setMPA = () => {
   const entry = {};
@@ -15,7 +16,7 @@ const setMPA = () => {
       const match = entryFile.match(/src\/(.*)\/index\.js/);
       const pageName = match && match[1];
       entry[pageName] = entryFile;
-      return htmlWebpackPlugins.push(
+      htmlWebpackPlugins.push(
         new htmlWebpackPlugin({
           inlineSource: '.css$',
           template: path.join(projectRoot, `./src/${pageName}/index.html`),
@@ -133,13 +134,16 @@ module.exports =  {
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
-    new CleanWebpackPlugin()
+    new CleanWebpackPlugin(),
+    new FriendlyErrorsWebpackPlugin()
   ].concat(htmlWebpackPlugins),
   devServer: {
     contentBase: './dist',
-    hot: true
+    hot: true,
+    stats: 'errors-only' // 再编译的时候 如何展示编译信息。 共有五种 error-only ==> 只在发生错误时输出  minmal ==> 只在发生错误时/ 或者有新的编译时输出   none ==> 不输出任何日志  normal ==> 标准输出  varbose ==> 全部输出
   },
-  devtool: 'source-map'
+  devtool: 'source-map',
+  
   // watch: true,
   // watchOptions: {
   //   ignored: /node_modules/, // 忽略不需要监听的文件夹

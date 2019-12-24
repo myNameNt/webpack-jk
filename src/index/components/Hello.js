@@ -35,13 +35,13 @@ class Hello extends React.Component{
       this.setState({
         Text: subPageA.default
       })
-    });
+    })
   }
   render(){
     const { Text } = this.state
     return (
       <div onClick={()=>this.showText()}>
-        <p>haha</p>
+        <p>构架</p>
         <div>
             {
             Text ? <Text/> : null
