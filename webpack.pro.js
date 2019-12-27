@@ -1,16 +1,17 @@
 'use strict'
 const path = require('path')
 const glob = require('glob')
+const webpack = require('webpack')
 const miniCssExtractPlugin = require('mini-css-extract-plugin') // css打包 chunk
 const optimizeCssAssetsWebpackPlugin  = require('optimize-css-assets-webpack-plugin') // css 压缩
 const htmlWebpackPlugin = require('html-webpack-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const HtmlWebpackExternalsPlugin = require('html-webpack-externals-plugin') // 将第三方包
-const projectRoot = process.cwd();
+const projectRoot = process.cwd()
 const setMPA = () => {
-  const entry = {};
-  const htmlWebpackPlugins = [];
-  const entryFiles = glob.sync(path.join(projectRoot, './src/*/index.js'));
+  const entry = {}
+  const htmlWebpackPlugins = []
+  const entryFiles = glob.sync(path.join(projectRoot, './src/*/index.js'))
   Object.keys(entryFiles)
     .map((index) => {
       const entryFile = entryFiles[index];
@@ -42,7 +43,7 @@ const setMPA = () => {
   };
 };
 
-const { entry, htmlWebpackPlugins } = setMPA();
+const { entry, htmlWebpackPlugins } = setMPA()
 module.exports =  {
   entry: {
     index: './src/index/index.js',
@@ -58,6 +59,12 @@ module.exports =  {
       {
         test: /.js$/,
         use: [
+          {
+            loader: 'thread-loader',
+            options: {
+              workers: 3
+            }
+          },
           'babel-loader',
           'eslint-loader'
         ]
@@ -129,7 +136,9 @@ module.exports =  {
       cssProcessor: require('cssnano')  //  需要依赖的插件
     }),
     new CleanWebpackPlugin(),
-    
+    new webpack.DllReferencePlugin({ // webpack 自带的分包工具， 但是需要 配置一个webpack.dll.js 先将需要 提出出来的公共包 打包到一起。 然后时候 DllReferencePlugin 将打包好的文件引入进去
+      manifest: require('./build/library/library.json')
+    })
   ].concat(htmlWebpackPlugins, [
     // 使用该插件需要放在 htmlWebpackPlugins 后面
     // new HtmlWebpackExternalsPlugin({ // 将第三方包单独提取出来，使用cnd的方式加载
@@ -146,7 +155,7 @@ module.exports =  {
     // splitChunks: {
     //   minSize: 0, // 引用的文件大于多少就将该文件提取出来  设置为0 时 只要别引用就提取出来
     //   cacheGroups: {
-    //     commons: {
+    //     vendors: {
     //       test: /(react|react-dom)/,
     //       name: "vendors",
     //       chunks: "all"
@@ -159,7 +168,7 @@ module.exports =  {
     //     commons: { // 项目重复用到的模块 打包到一起
     //       name: 'commons',
     //       chunks: 'all',
-    //       minChunks: 1,
+    //       minChunks: 2,
     //       priority: 0 
     //     },
     //     vendors: {  // 项目用到的第三方包 打包到一起
@@ -172,7 +181,7 @@ module.exports =  {
     // }
   },
   devtool: 'inline-source-map',
-  stats: 'errors-only'// 再编译的时候 如何展示编译信息。 共有五种 error-only ==> 只在发生错误时输出  minmal ==> 只在发生错误时/ 或者有新的编译时输出   none ==> 不输出任何日志  normal ==> 标准输出  varbose ==> 全部输出
+  // stats: 'errors-only'// 再编译的时候 如何展示编译信息。 共有五种 error-only ==> 只在发生错误时输出  minmal ==> 只在发生错误时/ 或者有新的编译时输出   none ==> 不输出任何日志  normal ==> 标准输出  varbose ==> 全部输出
   // plugins: [
   //   new webpack.HotModuleReplacementPlugin()
   // ],
